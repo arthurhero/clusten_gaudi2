@@ -1,8 +1,4 @@
-###############################################################################
-# Copyright (C) 2020-2021 Habana Labs, Ltd. an Intel Company
-###############################################################################
+from .clusten import CLUSTENQKFunction
 
-from .custom_relu import CustomReLU
-
-__all__ = [CustomReLU]
+__all__ = [CLUSTENQKFunction]
 
