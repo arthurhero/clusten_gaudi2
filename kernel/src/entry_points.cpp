@@ -18,6 +18,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVE
 
 #include "entry_points.hpp"
 #include <stdio.h>
+#include <cstring>
 extern "C"
 {
 

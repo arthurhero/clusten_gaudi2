@@ -23,6 +23,7 @@ extern "C"
 typedef enum
 {
     GAUDI2_KERNEL_ADD_F32=0,
+    GAUDI2_KERNEL_MAX_EXAMPLE_KERNEL
 
 } Gaudi2_Kernel_Name_e;
 
