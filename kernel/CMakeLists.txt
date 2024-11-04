@@ -22,7 +22,7 @@ set(TPCSIM_SHARED_LIBRARY "/usr/lib/habanatools/libtpcsim_shared.so" CACHE STRIN
 set(TPC_TEST_CORE_LIBRARY "/usr/lib/habanatools/libtpc_tests_core_ext.so" CACHE STRING "Path to TPC test core shared object")
 set(TPC_ELF_READER_LIBRARY "/usr/lib/habanatools/libTpcElfReader.so" CACHE STRING "Path to Elf Reader shared object")
 set(TPC_INCLUDE_DIR "/usr/lib/habanatools/include" CACHE STRING "Path to TPC includes")
-set(TPC_CURRENT_LIST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/kernels/include" CACHE STRING "Path to current includes")
+set(TPC_CURRENT_LIST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include" CACHE STRING "Path to current includes")
 set(TPC_TESTS_CORE_INCLUDE_DIR "/usr/lib/habanatools/include" CACHE STRING "Path to tests_core includes")
 
 
