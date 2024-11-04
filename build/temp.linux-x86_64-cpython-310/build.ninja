@@ -15,7 +15,7 @@ rule compile
 
 
 
-build /src/Model-References/PyTorch/examples/custom_op/custom_relu/build/temp.linux-x86_64-cpython-310/hpu_custom_relu.o: compile /src/Model-References/PyTorch/examples/custom_op/custom_relu/hpu_custom_relu.cpp
+build /src/clusten_gaudi2/build/temp.linux-x86_64-cpython-310/hpu_custom_relu.o: compile /src/clusten_gaudi2/hpu_custom_relu.cpp
 
 
 

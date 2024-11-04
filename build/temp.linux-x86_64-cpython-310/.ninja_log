@@ -1,2 +1,2 @@
 # ninja log v5
-1	21665	1730430118996492440	/src/Model-References/PyTorch/examples/custom_op/custom_relu/build/temp.linux-x86_64-cpython-310/hpu_custom_relu.o	dde8a9688894e1d1
+0	21660	1730439589734380738	/src/clusten_gaudi2/build/temp.linux-x86_64-cpython-310/hpu_custom_relu.o	cf40a8fccf213ee5
