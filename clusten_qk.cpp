@@ -140,7 +140,7 @@ std::vector<at::Tensor> clusten_qk_bwd_execute(
 
 TORCH_LIBRARY(custom_op, m) {
   m.def("clusten_qk_fwd(Tensor query, Tensor key, Tensor nbhd_idx) -> Tensor");
-  m.def("clusten_qk_bwd(Tensor d_attn, Tensor query, Tensor key, Tensor nbhd_idx) -> vector<Tensor>");
+  m.def("clusten_qk_bwd(Tensor d_attn, Tensor query, Tensor key, Tensor nbhd_idx) -> vector");
 }
 TORCH_LIBRARY_IMPL(custom_op, HPU, m) {
   m.impl("clusten_qk_fwd", clusten_qk_fwd_execute);
