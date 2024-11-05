@@ -59,8 +59,7 @@ void main(const tensor query,      // b x h x n x c
                 const int h = z - b * heads;
 
                 int5 nbi_coords = {ni, i, b, 0, 0};
-                int* nbi_addr_ = (int*)gen_addr(nbi_coords, nbhd_idx);
-                unsigned int nbi_addr = (unsigned int)nbi_addr_;
+                __global__ unsigned int nbi_addr = (__global__ unsigned int)gen_addr(nbi_coords, nbhd_idx);
                 long int nbi = s_i32_ld_l(nbi_addr); 
 
                 // calculate q@k
@@ -69,15 +68,15 @@ void main(const tensor query,      // b x h x n x c
                 for (int c=0; c < dim; ++c) {
                     int5 q_coords = {c, i, h, b, 0};
                     int5 k_coords = {nbi, c, h, b, 0};
-                    unsigned int q_addr = gen_addr(q_coords, query);
-                    unsigned int k_addr = gen_addr(k_coords, key);
+                    __global__ unsigned int q_addr = (__global__ unsigned int)gen_addr(q_coords, query);
+                    __global__ unsigned int k_addr = (__global__ unsigned int)gen_addr(k_coords, key);
                     float q = s_f32_ld_l(q_addr);
                     float k = s_f32_ld_l(k_addr);
                     updt += q * k;
                 }
 
                 int5 a_coords = {ni, i, h, b, 0};
-                unsigned int a_addr = gen_addr(a_coords, attn);
+                __global__ unsigned int a_addr = (__global__ unsigned int)gen_addr(a_coords, attn);
                 s_f32_st_l(a_addr, updt);
             }
         }
