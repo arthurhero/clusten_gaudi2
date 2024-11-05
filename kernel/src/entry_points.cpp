@@ -93,14 +93,14 @@ InstantiateTpcKernel(_IN_  tpc_lib_api::HabanaKernelParams* params,
         return avgpool2dbwdf32g2Instance.GetGcDefinitions(params, instance);
     }
 
-    CLUSTENQKF32Gaudi2 clustenqkfwdf32g2Instance(AvgPool2dF32Gaudi2::fwd);
+    CLUSTENQKF32Gaudi2 clustenqkfwdf32g2Instance(CLUSTENQKF32Gaudi2::fwd);
     clustenqkfwdf32g2Instance.GetKernelName(kernelName);
     if (strcmp(params->guid.name, kernelName) == 0)
     {
         return clustenqkfwdf32g2Instance.GetGcDefinitions(params, instance);
     }
 
-    CLUSTENQKF32Gaudi2 clustenqkbwdf32g2Instance(AvgPool2dF32Gaudi2::bwd);
+    CLUSTENQKF32Gaudi2 clustenqkbwdf32g2Instance(CLUSTENQKF32Gaudi2::bwd);
     clustenqkbwdf32g2Instance.GetKernelName(kernelName);
     if (strcmp(params->guid.name, kernelName) == 0)
     {
