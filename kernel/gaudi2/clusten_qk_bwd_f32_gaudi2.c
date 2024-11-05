@@ -63,8 +63,8 @@ void main(
                 float d_attn_tmp;
 
                 int5 q_coords = {c, i, h, b, 0};
-                __global__ float* q_addr = (__global__ float*)gen_addr(q_coords, query);
-                float q_val = s_f32_ld_g(q_addr);
+                //__global__ float* q_addr = (__global__ float*)gen_addr(q_coords, query);
+                //float q_val = s_f32_ld_g(q_addr);
 
                 #pragma unroll
                 for (unsigned int ni=0; ni < nbhd_size; ++ni) {
