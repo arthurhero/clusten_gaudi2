@@ -13,7 +13,8 @@ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCL
 OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ********************************************************************/
-#include <semaphore>
+#include <mutex>
+std::mutex mtx;
 
 std::binary_semaphore smphDkeyAdd{0};
 
@@ -87,9 +88,9 @@ void main(
                     float dk_add = q_val * d_attn_tmp;
 
                     __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
-                    smphDkeyAdd.acquire();
+                    mtx.lock();
                     s_f32_st_g(dk_addr, dk_add + s_f32_ld_g(dk_addr));
-                    smphDkeyAdd.release();
+                    mtx.unlock();
                 }
                 __global__ float* dq_addr = (__global__ float*)gen_addr(q_coords, d_query);
                 s_f32_st_g(dq_addr, dq_update);
