@@ -40,7 +40,7 @@ bool register_clusten_qk_fwd() {
     // actual register
     REGISTER_CUSTOM_OP_ATTRIBUTES(
         "custom_op::clusten_qk_fwd", //schema name
-        "GAUDI2_KERNEL_CLUSTEN_QK_FWD_F32", // guid
+        "clusten_qk_fwd_f32_gaudi2", // guid
         inputs_desc,
         outputs_desc,
         nullptr);
@@ -92,7 +92,7 @@ bool register_clusten_qk_bwd() {
     // actual register
     REGISTER_CUSTOM_OP_ATTRIBUTES(
         "custom_op::clusten_qk_bwd", //schema name
-        "GAUDI2_KERNEL_CLUSTEN_QK_BWD_F32", // guid
+        "clusten_qk_bwd_f32_gaudi2", // guid
         inputs_desc,
         outputs_desc,
         nullptr);
