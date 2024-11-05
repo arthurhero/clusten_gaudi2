@@ -50,10 +50,10 @@ void main(const tensor query,      // b x h x n x c
     for (int z = batch_head_start; z < batch_head_end; z += batch_head_step)
     {
         #pragma loop_taken
-        for (int ni = nbhd_start; c < nbhd_end; c += nbhd_step)
+        for (int ni = nbhd_start; ni < nbhd_end; ni += nbhd_step)
         {
             #pragma loop_taken
-            for (int i = seq_start; h < seq_end; h += seq_step)
+            for (int i = seq_start; i < seq_end; i += seq_step)
             {
                 const int b = z / heads;
                 const int h = z - b * heads;
@@ -66,8 +66,8 @@ void main(const tensor query,      // b x h x n x c
                 float updt = 0.0;
                 #pragma loop_unroll
                 for (int c=0; c < dim; ++c) {
-                    q_coords = {c, i, h, b, 0};
-                    k_coords = {nbi, c, h, b, 0};
+                    int5 q_coords = {c, i, h, b, 0};
+                    int5 k_coords = {nbi, c, h, b, 0};
                     float* q_addr = (float*)gen_addr(q_coords, query);
                     float* k_addr = (float*)gen_addr(k_coords, key);
                     float q = s_f32_ld_l(q_addr);
@@ -75,8 +75,8 @@ void main(const tensor query,      // b x h x n x c
                     updt += q * k;
                 }
 
-                a_coords = {ni, i, h, b, 0};
-                a_addr = (float*)gen_addr(a_coords, attn);
+                int5 a_coords = {ni, i, h, b, 0};
+                float* a_addr = (float*)gen_addr(a_coords, attn);
                 s_f32_st_l(a_addr, updt);
             }
         }

@@ -57,7 +57,7 @@ void main(
         for (int c = channel_start; c < channel_end; c += channel_step)
         {
             #pragma loop_taken
-            for (int i = seq_start; h < seq_end; h += seq_step)
+            for (int i = seq_start; i < seq_end; i += seq_step)
             {
                 const int b = z / heads;
                 const int h = z - b * heads;
