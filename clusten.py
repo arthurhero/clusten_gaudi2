@@ -40,6 +40,7 @@ class CLUSTENQKFunction(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad_attn):
-        outputs = torch.ops.custom_op.clusten_qk_bwd(grad_attn.contiguous(), *ctx.saved_tensors)
+        query,key,nbhd_idx = ctx.saved_tensors
+        outputs = torch.ops.custom_op.clusten_qk_bwd(grad_attn.contiguous(), query, key, nbhd_idx)
         d_query, d_key = outputs
         return d_query, d_key, None
