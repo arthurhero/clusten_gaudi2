@@ -22,10 +22,10 @@ void main(const tensor query,      // b x h x n x c
           tensor attn)             // b x h x n x m
 {
     const int dim = get_dim_size(query, 0);
-    const int length = get_dim_size(query, 1);
+    //const int length = get_dim_size(query, 1);
     const int heads = get_dim_size(query, 2);
-    const int batch_size = get_dim_size(query, 3);
-    const int nbhd_size = get_dim_size(nbhd_idx, 0);
+    //const int batch_size = get_dim_size(query, 3);
+    //const int nbhd_size = get_dim_size(nbhd_idx, 0);
 
     const int nbhd = 0;
     const int seq = 1;
@@ -59,7 +59,7 @@ void main(const tensor query,      // b x h x n x c
                 const int h = z - b * heads;
 
                 int5 nbi_coords = {ni, i, b, 0, 0};
-                unsigned int nbi_addr = (unsigned int)gen_addr(nbi_coords, nbhd_idx);
+                unsigned int nbi_addr = gen_addr(nbi_coords, nbhd_idx);
                 long int nbi = s_i32_ld_l(nbi_addr); 
 
                 // calculate q@k
@@ -68,15 +68,15 @@ void main(const tensor query,      // b x h x n x c
                 for (int c=0; c < dim; ++c) {
                     int5 q_coords = {c, i, h, b, 0};
                     int5 k_coords = {nbi, c, h, b, 0};
-                    unsigned int q_addr = (unsigned int)gen_addr(q_coords, query);
-                    unsigned int k_addr = (unsigned int)gen_addr(k_coords, key);
+                    unsigned int q_addr = gen_addr(q_coords, query);
+                    unsigned int k_addr = gen_addr(k_coords, key);
                     float q = s_f32_ld_l(q_addr);
                     float k = s_f32_ld_l(k_addr);
                     updt += q * k;
                 }
 
                 int5 a_coords = {ni, i, h, b, 0};
-                unsigned int a_addr = (unsigned int)gen_addr(a_coords, attn);
+                unsigned int a_addr = gen_addr(a_coords, attn);
                 s_f32_st_l(a_addr, updt);
             }
         }
