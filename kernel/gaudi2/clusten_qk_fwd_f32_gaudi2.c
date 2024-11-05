@@ -68,16 +68,16 @@ void main(const tensor query,      // b x h x n x c
                 for (int c=0; c < dim; ++c) {
                     int5 q_coords = {c, i, h, b, 0};
                     int5 k_coords = {nbi, c, h, b, 0};
-                    __global__ unsigned int q_addr = (__global__ unsigned int)gen_addr(q_coords, query);
-                    __global__ unsigned int k_addr = (__global__ unsigned int)gen_addr(k_coords, key);
-                    float q = s_f32_ld_l(q_addr);
-                    float k = s_f32_ld_l(k_addr);
+                    __global__ float* q_addr = (__global__ float*)gen_addr(q_coords, query);
+                    __global__ float* k_addr = (__global__ float*)gen_addr(k_coords, key);
+                    float q = s_f32_ld_g(q_addr);
+                    float k = s_f32_ld_g(k_addr);
                     updt += q * k;
                 }
 
                 int5 a_coords = {ni, i, h, b, 0};
-                __global__ unsigned int a_addr = (__global__ unsigned int)gen_addr(a_coords, attn);
-                s_f32_st_l(a_addr, updt);
+                __global__ float* a_addr = (__global__ float*)gen_addr(a_coords, attn);
+                s_f32_st_g(a_addr, updt);
             }
         }
     }

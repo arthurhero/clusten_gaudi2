@@ -67,30 +67,30 @@ void main(
                 float d_attn_tmp;
 
                 int5 q_coords = {c, i, h, b, 0};
-                float* q_addr = (float*)gen_addr(q_coords, query);
-                float q_val = s_f32_ld_l(q_addr);
+                __global__ float* q_addr = (__global__ float*)gen_addr(q_coords, query);
+                float q_val = s_f32_ld_g(q_addr);
 
                 #pragma unroll
                 for (unsigned int ni=0; ni < nbhd_size; ++ni) {
                     int5 nbi_coords = {ni, i, b, 0, 0};
-                    int* nbi_addr = (int*)gen_addr(nbi_coords, nbhd_idx);
+                    __global__ int* nbi_addr = (__global__ int*)gen_addr(nbi_coords, nbhd_idx);
                     long int nbi = s_i32_ld_l(nbi_addr); 
 
                     // calculate d_query = key * d_att
                     // calculate d_key = query * d_att
                     int5 da_coords = {ni, i, h, b, 0};
-                    float* da_addr = (float*)gen_addr(da_coords, d_attn);
-                    d_attn_tmp = s_f32_ld_l(da_addr);
+                    __global__ float* da_addr = (__global__ float*)gen_addr(da_coords, d_attn);
+                    d_attn_tmp = s_f32_ld_g(da_addr);
                     int5 k_coords = {c, nbi, h, b, 0};
-                    float* k_addr = (float*)gen_addr(k_coords, key);
-                    dq_update += s_f32_ld_l(k_addr) * d_attn_tmp;
+                    __global__ float* k_addr = (__global__ float*)gen_addr(k_coords, key);
+                    dq_update += s_f32_ld_g(k_addr) * d_attn_tmp;
 
                     float dk_add = q_val * d_attn_tmp;
 
-                    float* dk_addr = (float*)gen_addr(k_coords, d_key);
-                    s_f32_st_l(dk_addr, dk_add + s_f32_ld_l(dk_addr));
+                    __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
+                    s_f32_st_l(dk_addr, dk_add + s_f32_ld_g(dk_addr));
                 }
-                float* dq_addr = (float*)gen_addr(q_coords, d_query);
+                __global__ float* dq_addr = (__global__ float*)gen_addr(q_coords, d_query);
                 s_f32_st_l(dq_addr, dq_update);
             }
         }
