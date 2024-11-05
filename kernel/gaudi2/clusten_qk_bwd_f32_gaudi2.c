@@ -74,7 +74,7 @@ void main(
                 for (unsigned int ni=0; ni < nbhd_size; ++ni) {
                     int5 nbi_coords = {ni, i, b, 0, 0};
                     __global__ int* nbi_addr = (__global__ int*)gen_addr(nbi_coords, nbhd_idx);
-                    long int nbi = s_i32_ld_l(nbi_addr); 
+                    long int nbi = s_i32_ld_g(nbi_addr); 
 
                     // calculate d_query = key * d_att
                     // calculate d_key = query * d_att
