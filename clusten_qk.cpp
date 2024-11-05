@@ -117,7 +117,7 @@ at::Tensor clusten_qk_fwd_execute(
   return output[0];
 }
 
-at::Tensor clusten_qk_bwd_execute(
+std::vector<at::Tensor> clusten_qk_bwd_execute(
     torch::Tensor d_attn,
     torch::Tensor query,
     torch::Tensor key,
