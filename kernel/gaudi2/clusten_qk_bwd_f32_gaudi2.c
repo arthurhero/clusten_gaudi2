@@ -17,10 +17,10 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVE
 void main(
     const tensor d_attn,         // b x h x n x m
     const tensor query,          // b x h x n x c
-    const tensor key,            // b x h x n x c
+    const tensor key,            // b x h x n_ x c
     const tensor nbhd_idx,       // b x n x m
     tensor d_query,              // b x h x n x c
-    tensor d_key)                // b x h x n x c
+    tensor d_key)                // b x h x n_ x c
 {
     //const int dim = get_dim_size(query, 0);
     //const int length = get_dim_size(query, 1);

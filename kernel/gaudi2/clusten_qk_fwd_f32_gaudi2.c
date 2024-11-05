@@ -17,7 +17,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVE
 #pragma tpc_printf (enable)
 
 void main(const tensor query,      // b x h x n x c
-          const tensor key,        // b x h x c x n (reordered by cluster)
+          const tensor key,        // b x h x c x n_ (reordered by cluster)
           const tensor nbhd_idx,   // b x n x m
           tensor attn)             // b x h x n x m
 {

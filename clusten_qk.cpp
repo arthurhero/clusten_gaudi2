@@ -83,7 +83,7 @@ bool register_clusten_qk_bwd() {
     habana::custom_op::OutputDesc output_desc{
         0, c10::ScalarType::Float, output_size_lambda};
     habana::custom_op::OutputDesc output_desc2{
-        0, c10::ScalarType::Float, output_size_lambda2};
+        1, c10::ScalarType::Float, output_size_lambda2};
 
 
     std::vector<habana::custom_op::OutputDesc> outputs_desc{
