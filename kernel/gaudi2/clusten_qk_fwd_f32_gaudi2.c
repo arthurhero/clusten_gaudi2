@@ -59,7 +59,7 @@ void main(const tensor query,      // b x h x n x c
                 const int h = z - b * heads;
 
                 int5 nbi_coords = {ni, i, b, 0, 0};
-                __global__ unsigned int nbi_addr = (__global__ unsigned int)gen_addr(nbi_coords, nbhd_idx);
+                __global__ int* nbi_addr = (__global__ int*)gen_addr(nbi_coords, nbhd_idx);
                 long int nbi = s_i32_ld_l(nbi_addr); 
 
                 // calculate q@k
