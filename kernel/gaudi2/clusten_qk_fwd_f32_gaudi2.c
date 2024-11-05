@@ -68,15 +68,15 @@ void main(const tensor query,      // b x h x n x c
                 for (int c=0; c < dim; ++c) {
                     int5 q_coords = {c, i, h, b, 0};
                     int5 k_coords = {nbi, c, h, b, 0};
-                    float* q_addr = (float*)gen_addr(q_coords, query);
-                    float* k_addr = (float*)gen_addr(k_coords, key);
+                    unsigned int q_addr = (unsigned int)gen_addr(q_coords, query);
+                    unsigned int k_addr = (unsigned int)gen_addr(k_coords, key);
                     float q = s_f32_ld_l(q_addr);
                     float k = s_f32_ld_l(k_addr);
                     updt += q * k;
                 }
 
                 int5 a_coords = {ni, i, h, b, 0};
-                float* a_addr = (float*)gen_addr(a_coords, attn);
+                unsigned int a_addr = (unsigned int)gen_addr(a_coords, attn);
                 s_f32_st_l(a_addr, updt);
             }
         }
