@@ -17,6 +17,9 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVE
 #ifndef _CLUSTEN_QK_F32_GAUDI2_HPP
 #define _CLUSTEN_QK_F32_GAUDI2_HPP
 
+#include "gc_interface.h"
+#include "tpc_kernel_lib_interface.h"
+
 #include <vector>
 #include <cstring>
 
