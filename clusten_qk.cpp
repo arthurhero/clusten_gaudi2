@@ -8,8 +8,7 @@
 #include <torch/extension.h>
 #include <perf_lib_layer_params.h>
 
-bool register_clusten_qk() {
-    // Registering custom_op::custom_add
+bool register_clusten_qk_fwd() {
     // inputs desc
     habana::custom_op::InputDesc input_a_desc{
         habana::custom_op::input_type::TENSOR, 0};
@@ -40,16 +39,16 @@ bool register_clusten_qk() {
 
     // actual register
     REGISTER_CUSTOM_OP_ATTRIBUTES(
-        "custom_op::clusten_qk", //schema name
-        "clusten_qk_fwd_f32_gaudi2", // guid
+        "custom_op::clusten_qk_fwd", //schema name
+        "GAUDI2_KERNEL_CLUSTEN_QK_FWD_F32", // guid
         inputs_desc,
         outputs_desc,
         nullptr);
-    std::cout << "cpp registered custom_op::clusten_qk\n";
+    std::cout << "cpp registered custom_op::clusten_qk_fwd\n";
     return true;
 }
 
-bool register_custom_relu_backward() {
+bool register_clusten_qk_bwd() {
     // Registering custom_op::custom_add
     // inputs desc
     habana::custom_op::InputDesc input_a_desc{
@@ -68,70 +67,83 @@ bool register_custom_relu_backward() {
     // output shape callback
     auto output_size_lambda =
         [](const at::Stack& inputs) -> std::vector<int64_t> {
-      auto self = inputs[0].toTensor(); // input
-      std::vector<int64_t> result_sizes = self.sizes().vec();
+      auto query = inputs[1].toTensor();
+      std::vector<int64_t> result_sizes = query.sizes().vec();
       return result_sizes;
     };
 
+    auto output_size_lambda2 =
+        [](const at::Stack& inputs) -> std::vector<int64_t> {
+      auto key = inputs[2].toTensor();
+      std::vector<int64_t> result_sizes = key.sizes().vec();
+      return result_sizes;
+    };
+
+
     habana::custom_op::OutputDesc output_desc{
         0, c10::ScalarType::Float, output_size_lambda};
+    habana::custom_op::OutputDesc output_desc2{
+        0, c10::ScalarType::Float, output_size_lambda2};
+
 
     std::vector<habana::custom_op::OutputDesc> outputs_desc{
-        output_desc};
+        output_desc, output_desc2};
 
     // actual register
     REGISTER_CUSTOM_OP_ATTRIBUTES(
-        "custom_op::clusten_qk_backward", //schema name
-        "clusten_qk_bwd_f32_gaudi2", // guid
+        "custom_op::clusten_qk_bwd", //schema name
+        "GAUDI2_KERNEL_CLUSTEN_QK_BWD_F32", // guid
         inputs_desc,
         outputs_desc,
         nullptr);
-    std::cout << "cpp registered custom_op::clusten_qk_backward\n";
+    std::cout << "cpp registered custom_op::clusten_qk_bwd\n";
     return true;
 }
 
-at::Tensor clusten_qk_execute(
+at::Tensor clusten_qk_fwd_execute(
     torch::Tensor query, torch::Tensor key, torch::Tensor nbhd_idx) {
   TORCH_CHECK(query.scalar_type() == c10::ScalarType::Float, "Input query expected to be Float tensor");
   TORCH_CHECK(key.scalar_type() == c10::ScalarType::Float, "Input key expected to be Float tensor");
   TORCH_CHECK(nbhd_idx.scalar_type() == c10::ScalarType::Long, "Input nbhd_idx expected to be Long tensor");
   // Registering the custom op, need to be called only once
-  static bool registered = register_clusten_qk();
-  TORCH_CHECK(registered, "clusten qk kernel not registered");
-  std::vector<c10::IValue> inputs{input_a};
+  static bool registered = register_clusten_qk_fwd();
+  TORCH_CHECK(registered, "clusten qk fwd kernel not registered");
+  std::vector<c10::IValue> inputs{query, key, nbhd_idx};
   // Get custom op descriptor from registry
-  auto op_desc = habana::custom_op::HabanaCustomOpDescriptor::getCustomOpDescriptor("custom_op::clusten_qk");
+  auto op_desc = habana::custom_op::HabanaCustomOpDescriptor::getCustomOpDescriptor("custom_op::clusten_qk_fwd");
   // Actual call for op execution
   std::vector<at::Tensor> output = op_desc.execute(inputs);
   // op_desc.execute will always return a vector
   return output[0];
 }
 
-at::Tensor clusten_qk_backward_execute(
-    torch::Tensor input_a,
-    torch::Tensor input_b,
-    c10::Scalar threshold) {
-  TORCH_CHECK(input_a.scalar_type() == c10::ScalarType::Float, "Input input_a expected to be Float tensor");
-  TORCH_CHECK(input_b.scalar_type() == c10::ScalarType::Float, "Input input_b expected to be Float tensor");
-  TORCH_CHECK(threshold.to<float>() == 0.0, "Threshold values other than 0 are not supported")
+at::Tensor clusten_qk_bwd_execute(
+    torch::Tensor d_attn,
+    torch::Tensor query,
+    torch::Tensor key,
+    torch::Tensor nbhd_idx) {
+  TORCH_CHECK(d_attn.scalar_type() == c10::ScalarType::Float, "Input d_attn expected to be Float tensor");
+  TORCH_CHECK(query.scalar_type() == c10::ScalarType::Float, "Input query expected to be Float tensor");
+  TORCH_CHECK(key.scalar_type() == c10::ScalarType::Float, "Input key expected to be Float tensor");
+  TORCH_CHECK(nbhd_idx.scalar_type() == c10::ScalarType::Long, "Input nbhd_idx expected to be Long tensor");
   // Registering the custom op, need to be called only once
-  static bool registered = register_custom_relu_backward();
-  TORCH_CHECK(registered, "custom_relu_backward kernel not registered" );
-  std::vector<c10::IValue> inputs{input_a, input_b, threshold};
+  static bool registered = register_clusten_qk_bwd();
+  TORCH_CHECK(registered, "clusten qk bwd kernel not registered" );
+  std::vector<c10::IValue> inputs{d_attn, query, key, nbhd_idx};
   // Get custom op descriptor from registry
-  auto op_desc = habana::custom_op::HabanaCustomOpDescriptor::getCustomOpDescriptor("custom_op::custom_relu_backward");
+  auto op_desc = habana::custom_op::HabanaCustomOpDescriptor::getCustomOpDescriptor("custom_op::clusten_qk_bwd");
   // Actual call for op execution
   std::vector<at::Tensor> output = op_desc.execute(inputs);
   // op_desc.execute will always return a vector
-  return output[0];
+  return output;
 }
 
 TORCH_LIBRARY(custom_op, m) {
-  m.def("clusten_qk(Tensor query, Tensor key, Tensor nbhd_idx) -> Tensor");
-  m.def("clusten_qk_backward(Tensor grad_attn, Tensor query, Tensor key, Tensor nbhd_idx) -> Tensor");
+  m.def("clusten_qk_fwd(Tensor query, Tensor key, Tensor nbhd_idx) -> Tensor");
+  m.def("clusten_qk_bwd(Tensor d_attn, Tensor query, Tensor key, Tensor nbhd_idx) -> vector<Tensor>");
 }
 TORCH_LIBRARY_IMPL(custom_op, HPU, m) {
-  m.impl("clusten_qk", clusten_qk_execute);
-  m.impl("clusten_qk_backward", clusten_qk_backward_execute);
+  m.impl("clusten_qk_fwd", clusten_qk_fwd_execute);
+  m.impl("clusten_qk_bwd", clusten_qk_bwd_execute);
 }
 

@@ -13,8 +13,8 @@ torch_lib_dir = get_lib_dir()
 habana_modules_directory = "/usr/include/habanalabs"
 pybind_include_path = pybind11.get_include()
 
-setup(name='clusten_qk',
-      ext_modules=[cpp_extension.CppExtension('clusten_qk', ['clusten_qk.cpp'],
+setup(name='clusten',
+      ext_modules=[cpp_extension.CppExtension('clusten', ['clusten_qk.cpp'],
             language='c++', extra_compile_args=["-std=c++17"],
             libraries=['habana_pytorch_plugin'],
             library_dirs=[torch_lib_dir])],
