@@ -59,12 +59,12 @@ void main(const tensor query,      // b x h x n x c
                 const int h = z - b * heads;
 
                 int5 nbi_coords = {ni, i, b, 0, 0};
-                int* nbi_addr = (int*)gen_addr(nbi_coords, nbhd_idx);
+                uint32_t nbi_addr = (uint32_t)gen_addr(nbi_coords, nbhd_idx);
                 long int nbi = s_i32_ld_l(nbi_addr); 
 
                 // calculate q@k
                 float updt = 0.0;
-                #pragma loop_unroll
+                #pragma unroll
                 for (int c=0; c < dim; ++c) {
                     int5 q_coords = {c, i, h, b, 0};
                     int5 k_coords = {nbi, c, h, b, 0};
