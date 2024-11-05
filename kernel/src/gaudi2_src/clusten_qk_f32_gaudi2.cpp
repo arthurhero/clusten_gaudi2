@@ -61,36 +61,16 @@ tpc_lib_api::GlueCodeReturn CLUSTENQKF32Gaudi2::GetGcDefinitions(
             return tpc_lib_api::GLUE_INCOMPATIBLE_OUTPUT_COUNT;
         }
 
-        retVal = ValidateTensorsDataType(in_defs->inputTensors,
-                                        1,
-                                        tpc_lib_api::DATA_F32);
-        if (retVal != tpc_lib_api::GLUE_SUCCESS)
+        if (in_defs->inputTensors[0].geometry.dataType != tpc_lib_api::DATA_F32 ||
+            in_defs->inputTensors[1].geometry.dataType != tpc_lib_api::DATA_F32 ||
+            in_defs->inputTensors[2].geometry.dataType != tpc_lib_api::DATA_I32 ||
+            in_defs->outputTensors[0].geometry.dataType != tpc_lib_api::DATA_F32)
         {
-            return retVal;
-        }
- 
-        retVal = ValidateTensorsDataType(&(in_defs->inputTensors[1]),
-                                            1,
-                                            tpc_lib_api::DATA_F32);
-        if (retVal != tpc_lib_api::GLUE_SUCCESS)
-        {
-            return retVal;
-        }
- 
-        retVal = ValidateTensorsDataType(&(in_defs->inputTensors[2]),
-                                            1,
-                                            tpc_lib_api::DATA_I32);
-        if (retVal != tpc_lib_api::GLUE_SUCCESS)
-        {
-            return retVal;
-        }
- 
-        retVal = ValidateTensorsDataType(in_defs->outputTensors,
-                                            in_defs->outputTensorNr,
-                                            tpc_lib_api::DATA_F32);
-        if (retVal != tpc_lib_api::GLUE_SUCCESS)
-        {
-            return retVal;
+            in_defs->inputTensors[0].geometry.dataType = tpc_lib_api::DATA_F32;
+            in_defs->inputTensors[1].geometry.dataType = tpc_lib_api::DATA_F32;
+            in_defs->inputTensors[2].geometry.dataType = tpc_lib_api::DATA_I32;
+            in_defs->outputTensors[0].geometry.dataType = tpc_lib_api::DATA_F32;
+            return tpc_lib_api::GLUE_INCOMPATIBLE_DATA_TYPE;
         }
     }
     else if (m_mode == bwd)
@@ -106,44 +86,20 @@ tpc_lib_api::GlueCodeReturn CLUSTENQKF32Gaudi2::GetGcDefinitions(
             return tpc_lib_api::GLUE_INCOMPATIBLE_OUTPUT_COUNT;
         }
 
-        retVal = ValidateTensorsDataType(in_defs->inputTensors,
-                                        1,
-                                        tpc_lib_api::DATA_F32);
-        if (retVal != tpc_lib_api::GLUE_SUCCESS)
+        if (in_defs->inputTensors[0].geometry.dataType != tpc_lib_api::DATA_F32 ||
+            in_defs->inputTensors[1].geometry.dataType != tpc_lib_api::DATA_F32 ||
+            in_defs->inputTensors[2].geometry.dataType != tpc_lib_api::DATA_F32 ||
+            in_defs->inputTensors[3].geometry.dataType != tpc_lib_api::DATA_I32 ||
+            in_defs->outputTensors[0].geometry.dataType != tpc_lib_api::DATA_F32 ||
+            in_defs->outputTensors[1].geometry.dataType != tpc_lib_api::DATA_F32)
         {
-            return retVal;
-        }
- 
-        retVal = ValidateTensorsDataType(&(in_defs->inputTensors[1]),
-                                            1,
-                                            tpc_lib_api::DATA_F32);
-        if (retVal != tpc_lib_api::GLUE_SUCCESS)
-        {
-            return retVal;
-        }
- 
-        retVal = ValidateTensorsDataType(&(in_defs->inputTensors[2]),
-                                            1,
-                                            tpc_lib_api::DATA_F32);
-        if (retVal != tpc_lib_api::GLUE_SUCCESS)
-        {
-            return retVal;
-        }
-
-        retVal = ValidateTensorsDataType(&(in_defs->inputTensors[3]),
-                                            1,
-                                            tpc_lib_api::DATA_I32);
-        if (retVal != tpc_lib_api::GLUE_SUCCESS)
-        {
-            return retVal;
-        }
- 
-        retVal = ValidateTensorsDataType(in_defs->outputTensors,
-                                            in_defs->outputTensorNr,
-                                            tpc_lib_api::DATA_F32);
-        if (retVal != tpc_lib_api::GLUE_SUCCESS)
-        {
-            return retVal;
+            in_defs->inputTensors[0].geometry.dataType = tpc_lib_api::DATA_F32;
+            in_defs->inputTensors[1].geometry.dataType = tpc_lib_api::DATA_F32;
+            in_defs->inputTensors[2].geometry.dataType = tpc_lib_api::DATA_F32;
+            in_defs->inputTensors[3].geometry.dataType = tpc_lib_api::DATA_I32;
+            in_defs->outputTensors[0].geometry.dataType = tpc_lib_api::DATA_F32;
+            in_defs->outputTensors[1].geometry.dataType = tpc_lib_api::DATA_F32;
+            return tpc_lib_api::GLUE_INCOMPATIBLE_DATA_TYPE;
         }
     }
     else
