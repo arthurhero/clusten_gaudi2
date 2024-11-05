@@ -28,8 +28,6 @@ void main(
     const int batch_size = get_dim_size(query, 3);
     const int nbhd_size = get_dim_size(nbhd_idx, 0);
 
-    const int d_key_numel = batch_size * heads * dim * length;
-
     const int channel = 0;
     const int seq = 1;
     const int batch_head = 2;
@@ -37,7 +35,6 @@ void main(
     const int5 index_space_start = get_index_space_offset();
     const int5 index_space_end   = get_index_space_size() + index_space_start;
 
-    /* CWHB */
     const int channel_step  = 1;
     const int channel_start = index_space_start[channel] * channel_step;
     const int channel_end   = index_space_end[channel] * channel_step;
@@ -62,7 +59,6 @@ void main(
                 const int b = z / heads;
                 const int h = z - b * heads;
 
-                long int index;
                 float dq_update = 0.0;
                 float d_attn_tmp;
 
