@@ -101,7 +101,7 @@ tpc_lib_api::GlueCodeReturn CLUSTENQKF32Gaudi2::GetGcDefinitions(
             in_defs->outputTensors[1].geometry.dataType = tpc_lib_api::DATA_F32;
             return tpc_lib_api::GLUE_INCOMPATIBLE_DATA_TYPE;
         }
-        std::cout << "out tensor" << in_defs->outputTensors[1].pData << std::endl; 
+        std::cout << "out tensor" << in_defs->outputTensors[1].pData[0] << std::endl; 
         in_defs->outputTensors[1].pData = (float*)calloc(in_defs->outputTensors[1].geometry.maxSizes[0] * in_defs->outputTensors[1].geometry.maxSizes[1] * in_defs->outputTensors[1].geometry.maxSizes[2] * in_defs->outputTensors[1].geometry.maxSizes[3], sizeof(float));
     }
     else
