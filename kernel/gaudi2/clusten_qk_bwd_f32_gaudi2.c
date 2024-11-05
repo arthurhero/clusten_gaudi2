@@ -22,10 +22,10 @@ void main(
     tensor d_query,              // b x h x n x c
     tensor d_key)                // b x h x c x n
 {
-    const int dim = get_dim_size(query, 0);
-    const int length = get_dim_size(query, 1);
+    //const int dim = get_dim_size(query, 0);
+    //const int length = get_dim_size(query, 1);
     const int heads = get_dim_size(query, 2);
-    const int batch_size = get_dim_size(query, 3);
+    //const int batch_size = get_dim_size(query, 3);
     const int nbhd_size = get_dim_size(nbhd_idx, 0);
 
     const int channel = 0;
