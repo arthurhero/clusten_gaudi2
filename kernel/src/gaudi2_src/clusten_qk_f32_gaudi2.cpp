@@ -48,50 +48,113 @@ tpc_lib_api::GlueCodeReturn CLUSTENQKF32Gaudi2::GetGcDefinitions(
     *   Stage I - validate input
     **************************************************************************************/
     //validate correct amount of input tensors
-    if (in_defs->inputTensorNr != 3)
+    if (m_mode == fwd)
     {
-        in_defs->inputTensorNr  = 3;
-        return tpc_lib_api::GLUE_INCOMPATIBLE_INPUT_COUNT;
+        if (in_defs->inputTensorNr != 3)
+        {
+            in_defs->inputTensorNr  = 3;
+            return tpc_lib_api::GLUE_INCOMPATIBLE_INPUT_COUNT;
+        }
+        if (in_defs->outputTensorNr !=1)
+        {
+            in_defs->outputTensorNr  = 1;
+            return tpc_lib_api::GLUE_INCOMPATIBLE_OUTPUT_COUNT;
+        }
+
+        retVal = ValidateTensorsDataType(in_defs->inputTensors,
+                                        1,
+                                        tpc_lib_api::DATA_F32);
+        if (retVal != tpc_lib_api::GLUE_SUCCESS)
+        {
+            return retVal;
+        }
+ 
+        retVal = ValidateTensorsDataType(&(in_defs->inputTensors[1]),
+                                            1,
+                                            tpc_lib_api::DATA_F32);
+        if (retVal != tpc_lib_api::GLUE_SUCCESS)
+        {
+            return retVal;
+        }
+ 
+        retVal = ValidateTensorsDataType(&(in_defs->inputTensors[2]),
+                                            1,
+                                            tpc_lib_api::DATA_I32);
+        if (retVal != tpc_lib_api::GLUE_SUCCESS)
+        {
+            return retVal;
+        }
+ 
+        retVal = ValidateTensorsDataType(in_defs->outputTensors,
+                                            in_defs->outputTensorNr,
+                                            tpc_lib_api::DATA_F32);
+        if (retVal != tpc_lib_api::GLUE_SUCCESS)
+        {
+            return retVal;
+        }
     }
-    //validate correct amount of output tensors
-    if (in_defs->outputTensorNr !=1)
+    else if (m_mode == bwd)
     {
-        in_defs->outputTensorNr  = 1;
-        return tpc_lib_api::GLUE_INCOMPATIBLE_OUTPUT_COUNT;
+        if (in_defs->inputTensorNr != 4)
+        {
+            in_defs->inputTensorNr  = 4;
+            return tpc_lib_api::GLUE_INCOMPATIBLE_INPUT_COUNT;
+        }
+        if (in_defs->outputTensorNr !=2)
+        {
+            in_defs->outputTensorNr = 2;
+            return tpc_lib_api::GLUE_INCOMPATIBLE_OUTPUT_COUNT;
+        }
+
+        retVal = ValidateTensorsDataType(in_defs->inputTensors,
+                                        1,
+                                        tpc_lib_api::DATA_F32);
+        if (retVal != tpc_lib_api::GLUE_SUCCESS)
+        {
+            return retVal;
+        }
+ 
+        retVal = ValidateTensorsDataType(&(in_defs->inputTensors[1]),
+                                            1,
+                                            tpc_lib_api::DATA_F32);
+        if (retVal != tpc_lib_api::GLUE_SUCCESS)
+        {
+            return retVal;
+        }
+ 
+        retVal = ValidateTensorsDataType(&(in_defs->inputTensors[2]),
+                                            1,
+                                            tpc_lib_api::DATA_F32);
+        if (retVal != tpc_lib_api::GLUE_SUCCESS)
+        {
+            return retVal;
+        }
+
+        retVal = ValidateTensorsDataType(&(in_defs->inputTensors[3]),
+                                            1,
+                                            tpc_lib_api::DATA_I32);
+        if (retVal != tpc_lib_api::GLUE_SUCCESS)
+        {
+            return retVal;
+        }
+ 
+        retVal = ValidateTensorsDataType(in_defs->outputTensors,
+                                            in_defs->outputTensorNr,
+                                            tpc_lib_api::DATA_F32);
+        if (retVal != tpc_lib_api::GLUE_SUCCESS)
+        {
+            return retVal;
+        }
     }
+    else
+    {
+        return tpc_lib_api::GLUE_NODE_NOT_FOUND;
+    }
+    
+    
 
     
-    retVal = ValidateTensorsDataType(in_defs->inputTensors,
-                                        1,
-                                        tpc_lib_api::DATA_F32);
-    if (retVal != tpc_lib_api::GLUE_SUCCESS)
-    {
-        return retVal;
-    }
-
-    retVal = ValidateTensorsDataType(&(in_defs->inputTensors[1]),
-                                        1,
-                                        tpc_lib_api::DATA_F32);
-    if (retVal != tpc_lib_api::GLUE_SUCCESS)
-    {
-        return retVal;
-    }
-
-    retVal = ValidateTensorsDataType(&(in_defs->inputTensors[2]),
-                                        1,
-                                        tpc_lib_api::DATA_I32);
-    if (retVal != tpc_lib_api::GLUE_SUCCESS)
-    {
-        return retVal;
-    }
-
-    retVal = ValidateTensorsDataType(in_defs->outputTensors,
-                                        in_defs->outputTensorNr,
-                                        tpc_lib_api::DATA_F32);
-    if (retVal != tpc_lib_api::GLUE_SUCCESS)
-    {
-        return retVal;
-    }
+    
 
     // Tensor 0 should be input feature map.
     // The semantics of the input tensors and their order is a convention
@@ -101,34 +164,23 @@ tpc_lib_api::GlueCodeReturn CLUSTENQKF32Gaudi2::GetGcDefinitions(
     *    Stage II -  Define index space geometry. In this example the index space matches
     *    the dimensions of the output tensor, up to dim 0.
     **************************************************************************************/
-    uint64_t outputSizes[gcapi::MAX_TENSOR_DIM];
+    out_defs->indexSpaceRank = 3;
 
-    out_defs->indexSpaceRank = 4;
-    uint64_t* indexSpaceSizes         = in_defs->inputTensors[0].geometry.maxSizes;
-    outputSizes[0] = indexSpaceSizes[0];
     if(m_mode == fwd)
     {
-        outputSizes[1] = (indexSpaceSizes[1] + def->srdef.pad_w - def->srdef.kernel_w * def->srdef.dilation_w) / def->srdef.stride_w;
-        outputSizes[2] = (indexSpaceSizes[2] + def->srdef.pad_h - def->srdef.kernel_h * def->srdef.dilation_h) / def->srdef.stride_h;
+        uint64_t* querySizes = in_defs->inputTensors[0].geometry.maxSizes;
+        uint64_t* nbhdIndexSizes = in_defs->inputTensors[2].geometry.maxSizes;
+        out_defs->indexSpaceGeometry[0] = nbhdIndexSizes[0]; // nbhd
+        out_defs->indexSpaceGeometry[1] = querySizes[1]; // seq
+        out_defs->indexSpaceGeometry[2] = querySizes[2] * querySizes[3]; // batch * head
     }
     else
     {
-        outputSizes[1] = (indexSpaceSizes[1] * def->srdef.stride_w) - def->srdef.pad_w + (def->srdef.kernel_w * def->srdef.dilation_w);
-        outputSizes[2] = (indexSpaceSizes[2] * def->srdef.stride_h) - def->srdef.pad_h + (def->srdef.kernel_h * def->srdef.dilation_h);
+        uint64_t* querySizes = in_defs->inputTensors[1].geometry.maxSizes;
+        out_defs->indexSpaceGeometry[0] = querySizes[0]; // channel 
+        out_defs->indexSpaceGeometry[1] = querySizes[1]; // seq
+        out_defs->indexSpaceGeometry[2] = querySizes[2] * querySizes[3]; // batch * head
     }
-    outputSizes[3] = indexSpaceSizes[3];
-    // verify that output feature map dimension are correct
-    if (memcmp(in_defs->outputTensors[0].geometry.maxSizes,outputSizes,
-               in_defs->outputTensors[0].geometry.dims * sizeof(uint64_t) ) != 0)
-    {
-        memcpy(in_defs->outputTensors[0].geometry.maxSizes,outputSizes,sizeof(outputSizes));
-        return tpc_lib_api::GLUE_INCOMPATIBLE_OUTPUT_SIZE;
-    }
-    //round up to 64 and divide by 64.
-    out_defs->indexSpaceGeometry[0] = (outputSizes[0] + 63) /64;
-    out_defs->indexSpaceGeometry[1] = outputSizes[1];
-    out_defs->indexSpaceGeometry[2] = outputSizes[2];
-    out_defs->indexSpaceGeometry[3] = outputSizes[3] ? outputSizes[3] : 1;
 
     /*************************************************************************************
     *    Stage III -  Define index space mapping
@@ -137,93 +189,41 @@ tpc_lib_api::GlueCodeReturn CLUSTENQKF32Gaudi2::GetGcDefinitions(
     {
         for (unsigned j = 0; j < out_defs->indexSpaceRank; j++)
         {
-            out_defs->inputTensorAccessPattern[i].mapping[j].indexSpaceDim     = 0;
+            out_defs->inputTensorAccessPattern[i].mapping[j].indexSpaceDim = 0;
             out_defs->inputTensorAccessPattern[i].mapping[j].a = 0;
             out_defs->inputTensorAccessPattern[i].mapping[j].start_b = 0;
             out_defs->inputTensorAccessPattern[i].mapping[j].end_b   = 0;
         }
     }
-    for (unsigned int i = 0; i < out_defs->indexSpaceRank; i++)
+    for (unsigned i = 0; i < in_defs->inputTensorNr; i++)
     {
-        out_defs->outputTensorAccessPattern[0].mapping[i].indexSpaceDim     = i;
-        out_defs->outputTensorAccessPattern[0].mapping[i].a = 0;
-        out_defs->outputTensorAccessPattern[0].mapping[i].start_b = 0;
-        out_defs->outputTensorAccessPattern[0].mapping[i].end_b   = 0;
-    }
-
-    GetAccessPatterns(out_defs,&(def->srdef),64);
-    if(m_mode == bwd)
-    {
-        out_defs->inputTensorAccessPattern[0].mapping[1].indexSpaceDim = 1;
-        out_defs->inputTensorAccessPattern[0].mapping[1].a = (1.0/def->srdef.stride_w);
-        out_defs->inputTensorAccessPattern[0].mapping[1].start_b = -((def->srdef.kernel_w - 1) + (def->srdef.stride_w - 1)) * def->srdef.dilation_w / def->srdef.stride_w;;
-        out_defs->inputTensorAccessPattern[0].mapping[1].end_b = (def->srdef.pad_w / (float)def->srdef.stride_w);
-
-        // start f(i) = stride*i + (-padh);
-        // end f(i) = stride*i + (kernelh*dilationh - padh );
-        // Resource 0 (IFM) dim 2 (height).
-        out_defs->inputTensorAccessPattern[0].mapping[2].indexSpaceDim = 2;
-        out_defs->inputTensorAccessPattern[0].mapping[2].a = (1.0/def->srdef.stride_h);
-        out_defs->inputTensorAccessPattern[0].mapping[2].start_b =  -((def->srdef.kernel_h - 1) + (def->srdef.stride_h - 1)) * def->srdef.dilation_h / def->srdef.stride_h;
-        out_defs->inputTensorAccessPattern[0].mapping[2].end_b = (def->srdef.pad_h / (float)def->srdef.stride_h);
-
-        out_defs->inputTensorAccessPattern[0].memsetBeforeExecution = 1;
-        out_defs->outputTensorAccessPattern[0].memsetBeforeExecution = 1;
+        for (unsigned j = 0; j < out_defs->indexSpaceRank; j++)
+        {
+            out_defs->outputTensorAccessPattern[i].mapping[j].indexSpaceDim = 0;
+            out_defs->outputTensorAccessPattern[i].mapping[j].a = 0;
+            out_defs->outputTensorAccessPattern[i].mapping[j].start_b = 0;
+            out_defs->outputTensorAccessPattern[i].mapping[j].end_b   = 0;
+        }
     }
 
     /*************************************************************************************
     *    Stage IV -  define scalar parameters/Set Auxiliary Tensor
     **************************************************************************************/
-    out_defs->kernel.paramsNr = sizeof(*def)/ sizeof(int);
-    memcpy(&( out_defs->kernel.scalarParams[0]), def, sizeof(*def));
-
-    const int maxWindowSize = def->srdef.kernel_h * def->srdef.kernel_w + 1;
-    out_defs->auxiliaryTensorNr = 1;
-    out_defs->auxiliaryTensors[0].geometry.dims = 1;
-    out_defs->auxiliaryTensors[0].geometry.maxSizes[0] = maxWindowSize;
-    out_defs->auxiliaryTensors[0].geometry.maxSizes[1] = 0;
-    out_defs->auxiliaryTensors[0].geometry.maxSizes[2] = 0;
-    out_defs->auxiliaryTensors[0].geometry.maxSizes[3] = 0;
-    out_defs->auxiliaryTensors[0].geometry.maxSizes[4] = 0;
-
-    out_defs->auxiliaryTensors[0].geometry.dataType = tpc_lib_api::DATA_F32;
-    
-    unsigned required_size = out_defs->auxiliaryTensors[0].geometry.maxSizes[0] * sizeof(float);
-    // Check whether required memory is allocated for auxiliary tensor
-    if (required_size > out_defs->auxiliaryTensors[0].bufferSize)
-    {
-        out_defs->auxiliaryTensors[0].bufferSize = required_size;
-        return tpc_lib_api::GLUE_INSUFFICIENT_AUX_BUFFER_SIZE;
-    }
-    out_defs->auxiliaryTensors[0].bufferSize = required_size;
-    if (out_defs->auxiliaryTensors[0].bufferSize >= required_size)
-    {
-        // fill aux 0 (for 1/x) with data
-        float* reciprocalTable = (float*)malloc(required_size);
-        fill_reciprocal_table(reciprocalTable, maxWindowSize);
-        // Initialize the auxiliary tensor with reduction_fcd_tab
-        out_defs->auxiliaryTensors[0].pData = reciprocalTable;
-        //memcpy(out_defs->auxiliaryTensors[0].pData, reciprocalTable, required_size);
-        //free(reciprocalTable);
-    }
-    else
-    {
-        return tpc_lib_api::GLUE_INSUFFICIENT_AUX_BUFFER_SIZE;
-    }
+    out_defs->kernel.paramsNr =0;
 
     /*************************************************************************************
     *    Stage V -  Load ISA into the descriptor.
     **************************************************************************************/
-    unsigned IsaSize = (&_binary___avg_pool_2d_fwd_f32_gaudi2_o_end - &_binary___avg_pool_2d_fwd_f32_gaudi2_o_start);
-    unsigned char *binary_kernel = &_binary___avg_pool_2d_fwd_f32_gaudi2_o_start;
+    unsigned IsaSize = (&_binary___clusten_qk_fwd_f32_gaudi2_o_end - &_binary___clusten_qk_fwd_f32_gaudi2_o_start);
+    unsigned char *binary_kernel = &_binary___clusten_qk_fwd_f32_gaudi2_o_start;
     switch (m_mode){
         case fwd:
-            IsaSize = (&_binary___avg_pool_2d_fwd_f32_gaudi2_o_end - &_binary___avg_pool_2d_fwd_f32_gaudi2_o_start);
-            binary_kernel = &_binary___avg_pool_2d_fwd_f32_gaudi2_o_start;
+            IsaSize = (&_binary___clusten_qk_fwd_f32_gaudi2_o_end - &_binary___clusten_qk_fwd_f32_gaudi2_o_start);
+            binary_kernel = &_binary___clusten_qk_fwd_f32_gaudi2_o_start;
             break;
         case bwd:
-            IsaSize = (&_binary___avg_pool_2d_bwd_f32_gaudi2_o_end - &_binary___avg_pool_2d_bwd_f32_gaudi2_o_start);
-            binary_kernel = &_binary___avg_pool_2d_bwd_f32_gaudi2_o_start;
+            IsaSize = (&_binary___clusten_qk_bwd_f32_gaudi2_o_end - &_binary___clusten_qk_bwd_f32_gaudi2_o_start);
+            binary_kernel = &_binary___clusten_qk_bwd_f32_gaudi2_o_start;
             break;
         default:
             break;
