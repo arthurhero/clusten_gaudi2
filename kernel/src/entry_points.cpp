@@ -15,6 +15,8 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVE
 ********************************************************************/
 
 #include "add_f32_gaudi2.hpp"
+#include "avg_pool_2d_f32_gaudi2.hpp"
+#include "clusten_qk_f32_gaudi2.hpp"
 
 #include "entry_points.hpp"
 #include <stdio.h>
@@ -28,10 +30,20 @@ tpc_lib_api::GlueCodeReturn GetKernelGuids( _IN_    tpc_lib_api::DeviceId       
 {
     if (deviceId == tpc_lib_api::DEVICE_ID_GAUDI2)
     {
-        if (guids != nullptr )
+        if (guids != nullptr)
         {
            AddF32Gaudi2 addf32g2Instance;
            addf32g2Instance.GetKernelName(guids[GAUDI2_KERNEL_ADD_F32].name);
+
+           AvgPool2dF32Gaudi2 avgpool2dfwdf32g2Instance(AvgPool2dF32Gaudi2::fwd);
+           avgpool2dfwdf32g2Instance.GetKernelName(guids[GAUDI2_KERNEL_AVG_POOL_2D_FWD_F32].name);
+           AvgPool2dF32Gaudi2 avgpool2dbwdf32g2Instance(AvgPool2dF32Gaudi2::bwd);
+           avgpool2dbwdf32g2Instance.GetKernelName(guids[GAUDI2_KERNEL_AVG_POOL_2D_BWD_F32].name);
+
+           CLUSTENQKF32Gaudi2 clustenqkfwdf32g2Instance(CLUSTENQKF32Gaudi2::fwd);
+           clustenqkfwdf32g2Instance.GetKernelName(guids[GAUDI2_KERNEL_CLUSTEN_QK_FWD_F32].name);
+           CLUSTENQKF32Gaudi2 clustenqkbwdf32g2Instance(CLUSTENQKF32Gaudi2::bwd);
+           clustenqkbwdf32g2Instance.GetKernelName(guids[GAUDI2_KERNEL_CLUSTEN_QK_BWD_F32].name);
         }
 
         if (kernelCount != nullptr)
@@ -66,6 +78,34 @@ InstantiateTpcKernel(_IN_  tpc_lib_api::HabanaKernelParams* params,
     {
         return addf32g2Instance.GetGcDefinitions(params, instance);
     }
+
+    AvgPool2dF32Gaudi2 avgpool2dfwdf32g2Instance(AvgPool2dF32Gaudi2::fwd);
+    avgpool2dfwdf32g2Instance.GetKernelName(kernelName);
+    if (strcmp(params->guid.name, kernelName) == 0)
+    {
+        return avgpool2dfwdf32g2Instance.GetGcDefinitions(params, instance);
+    }
+
+    AvgPool2dF32Gaudi2 avgpool2dbwdf32g2Instance(AvgPool2dF32Gaudi2::bwd);
+    avgpool2dbwdf32g2Instance.GetKernelName(kernelName);
+    if (strcmp(params->guid.name, kernelName) == 0)
+    {
+        return avgpool2dbwdf32g2Instance.GetGcDefinitions(params, instance);
+    }
+
+    CLUSTENQKF32Gaudi2 clustenqkfwdf32g2Instance(AvgPool2dF32Gaudi2::fwd);
+    clustenqkfwdf32g2Instance.GetKernelName(kernelName);
+    if (strcmp(params->guid.name, kernelName) == 0)
+    {
+        return clustenqkfwdf32g2Instance.GetGcDefinitions(params, instance);
+    }
+
+    CLUSTENQKF32Gaudi2 clustenqkbwdf32g2Instance(AvgPool2dF32Gaudi2::bwd);
+    clustenqkbwdf32g2Instance.GetKernelName(kernelName);
+    if (strcmp(params->guid.name, kernelName) == 0)
+    {
+        return clustenqkbwdf32g2Instance.GetGcDefinitions(params, instance);
+    } 
 
     return tpc_lib_api::GLUE_NODE_NOT_FOUND;
 }
