@@ -85,6 +85,7 @@ void main(
 
                     //__global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
                     //s_f32_st_g(dk_addr, dk_add + s_f32_ld_g(dk_addr));
+                    s_f32_st_g(dk_addr, 0.0);
                 }
                 __global__ float* dq_addr = (__global__ float*)gen_addr(q_coords, d_query);
                 s_f32_st_g(dq_addr, dq_update);

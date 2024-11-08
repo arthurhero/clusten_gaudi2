@@ -101,8 +101,8 @@ tpc_lib_api::GlueCodeReturn CLUSTENQKF32Gaudi2::GetGcDefinitions(
             in_defs->outputTensors[1].geometry.dataType = tpc_lib_api::DATA_F32;
             return tpc_lib_api::GLUE_INCOMPATIBLE_DATA_TYPE;
         }
-        in_defs->outputTensors[1].pData = (float*)calloc(in_defs->outputTensors[1].geometry.maxSizes[0] * in_defs->outputTensors[1].geometry.maxSizes[1] * in_defs->outputTensors[1].geometry.maxSizes[2] * in_defs->outputTensors[1].geometry.maxSizes[3], sizeof(float));
-        std::cout << "out tensor" << ((float*)in_defs->outputTensors[1].pData)[0] << std::endl; 
+        //in_defs->outputTensors[1].pData = (float*)calloc(in_defs->outputTensors[1].geometry.maxSizes[0] * in_defs->outputTensors[1].geometry.maxSizes[1] * in_defs->outputTensors[1].geometry.maxSizes[2] * in_defs->outputTensors[1].geometry.maxSizes[3], sizeof(float));
+        //std::cout << "out tensor" << ((float*)in_defs->outputTensors[1].pData)[0] << std::endl; 
     }
     else
     {
@@ -168,6 +168,7 @@ tpc_lib_api::GlueCodeReturn CLUSTENQKF32Gaudi2::GetGcDefinitions(
     *    Stage IV -  define scalar parameters/Set Auxiliary Tensor
     **************************************************************************************/
     out_defs->kernel.paramsNr =0;
+
 
     /*************************************************************************************
     *    Stage V -  Load ISA into the descriptor.
