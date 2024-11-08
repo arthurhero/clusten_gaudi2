@@ -74,8 +74,8 @@ void main(
                 float d_attn_tmp;
 
                 int5 q_coords = {c, i, h, b, 0};
-                //__global__ float* q_addr = (__global__ float*)gen_addr(q_coords, query);
-                //float q_val = s_f32_ld_g(q_addr);
+                __global__ float* q_addr = (__global__ float*)gen_addr(q_coords, query);
+                float q_val = s_f32_ld_g(q_addr);
 
                 #pragma unroll
                 for (unsigned int ni=0; ni < nbhd_size; ++ni) {
@@ -92,11 +92,10 @@ void main(
                     __global__ float* k_addr = (__global__ float*)gen_addr(k_coords, key);
                     dq_update += s_f32_ld_g(k_addr) * d_attn_tmp;
 
-                    //float dk_add = q_val * d_attn_tmp;
+                    float dk_add = q_val * d_attn_tmp;
 
-                    //__global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
-                    //s_f32_st_g(dk_addr, dk_add + s_f32_ld_g(dk_addr));
-                    //s_f32_st_g(dk_addr, 0.0);
+                    __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
+                    s_f32_st_g(dk_addr, dk_add + s_f32_ld_g(dk_addr));
                 }
                 __global__ float* dq_addr = (__global__ float*)gen_addr(q_coords, d_query);
                 s_f32_st_g(dq_addr, dq_update);
