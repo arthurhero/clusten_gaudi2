@@ -68,8 +68,7 @@ void main(
             for (int ki = key_length_start; ki < key_length_end; ki += key_length_step)
             {
                 int5 k_coords = {c, ki, h, b, 0};
-                dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
-                s_f32_st_g(dk_addr, 0.0);
+                dk_update = 0.0;
 
                 #pragma loop_taken
                 for (int i = seq_start; i < seq_end; i += seq_step)
@@ -100,13 +99,15 @@ void main(
          
                         if (nbi == ki) {
                             float dk_add = q_val * d_attn_tmp;
-                            dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
-                            s_f32_st_g(dk_addr, dk_add + s_f32_ld_g(dk_addr));
+                            dk_update += dk_add;
                         }
                     }
                     __global__ float* dq_addr = (__global__ float*)gen_addr(q_coords, d_query);
                     if (ki==0) s_f32_st_g(dq_addr, dq_update);
                 }
+                int5 dk_coords = {c, ki, h, b, 0};
+                __global__ float* dk_addr = (__global__ float*)gen_addr(dk_coords, d_key);
+                s_f32_st_g(dk_addr, dk_update);
             }
         }
     }
