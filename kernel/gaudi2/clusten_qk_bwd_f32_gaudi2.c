@@ -67,6 +67,7 @@ void main(
 
             #pragma loop_taken
             for (int ki = key_length_start; ki < key_length_end; ki += key_length_step)
+            {
                 k_coords = {c, ki, h, b, 0};
                 dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
                 s_f32_st_g(dk_addr, 0.0);
