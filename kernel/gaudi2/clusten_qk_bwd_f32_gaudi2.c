@@ -65,6 +65,7 @@ void main(
                     __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords_, d_key);
                     s_f32_st_g(dk_addr, 0.0);
                 }
+            }
 
             #pragma loop_taken
             for (int i = seq_start; i < seq_end; i += seq_step)
