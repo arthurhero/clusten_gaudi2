@@ -58,7 +58,7 @@ void main(
         for (int c = channel_start; c < channel_end; c += channel_step)
         {
             // initialize d_key to 0
-            if (seq_start==0) && (c==0) && (z==0) {
+            if (seq_start == 0) {
                 #pragma unroll
                 for (int i = 0; i < length_key; i++) {
                     int5 k_coords_ = {c, i, h, b, 0};
