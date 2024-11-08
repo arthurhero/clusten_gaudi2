@@ -32,6 +32,7 @@ void main(
     const int channel = 0;
     const int seq = 1;
     const int batch_head = 2;
+    const int key_length = 3;
 
     const int5 index_space_start = get_index_space_offset();
     const int5 index_space_end   = get_index_space_size() + index_space_start;
@@ -48,6 +49,10 @@ void main(
     const int batch_head_start = index_space_start[batch_head] * batch_head_step;
     const int batch_head_end   = index_space_end[batch_head] * batch_head_step;
 
+    const int key_length_step  = 1;
+    const int key_length_start = index_space_start[key_length] * key_length_step;
+    const int key_length_end   = index_space_end[key_length] * key_length_step;
+
     #pragma loop_taken
     for (int z = batch_head_start; z < batch_head_end; z += batch_head_step)
     {
@@ -57,48 +62,51 @@ void main(
         #pragma loop_taken
         for (int c = channel_start; c < channel_end; c += channel_step)
         {
-            // initialize d_key to 0
-            if (seq_start == 0) {
-                #pragma unroll
-                for (int i = 0; i < length_key; i++) {
-                    int5 k_coords_ = {c, i, h, b, 0};
-                    __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords_, d_key);
-                    s_f32_st_g(dk_addr, 0.0);
-                }
-            }
+            __global__ float* dk_addr;
+            int5 k_coords;
 
             #pragma loop_taken
-            for (int i = seq_start; i < seq_end; i += seq_step)
-            {
-                float dq_update = 0.0;
-                float d_attn_tmp;
+            for (int ki = key_length_start; ki < key_length_end; ki += key_length_step)
+                k_coords = {c, ki, h, b, 0};
+                dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
+                s_f32_st_g(dk_addr, 0.0);
 
-                int5 q_coords = {c, i, h, b, 0};
-                __global__ float* q_addr = (__global__ float*)gen_addr(q_coords, query);
-                float q_val = s_f32_ld_g(q_addr);
+                #pragma loop_taken
+                for (int i = seq_start; i < seq_end; i += seq_step)
+                {
+                    float dq_update = 0.0;
+                    float d_attn_tmp;
+         
+                    int5 q_coords = {c, i, h, b, 0};
+                    __global__ float* q_addr = (__global__ float*)gen_addr(q_coords, query);
+                    float q_val = s_f32_ld_g(q_addr);
+         
+                    #pragma unroll
+                    for (unsigned int ni=0; ni < nbhd_size; ++ni) {
+                        int5 nbi_coords = {ni, i, b, 0, 0};
+                        __global__ int* nbi_addr = (__global__ int*)gen_addr(nbi_coords, nbhd_idx);
+                        long int nbi = s_i32_ld_g(nbi_addr); 
 
-                #pragma unroll
-                for (unsigned int ni=0; ni < nbhd_size; ++ni) {
-                    int5 nbi_coords = {ni, i, b, 0, 0};
-                    __global__ int* nbi_addr = (__global__ int*)gen_addr(nbi_coords, nbhd_idx);
-                    long int nbi = s_i32_ld_g(nbi_addr); 
-
-                    // calculate d_query = key * d_att
-                    // calculate d_key = query * d_att
-                    int5 da_coords = {ni, i, h, b, 0};
-                    __global__ float* da_addr = (__global__ float*)gen_addr(da_coords, d_attn);
-                    d_attn_tmp = s_f32_ld_g(da_addr);
-                    int5 k_coords = {c, nbi, h, b, 0};
-                    __global__ float* k_addr = (__global__ float*)gen_addr(k_coords, key);
-                    dq_update += s_f32_ld_g(k_addr) * d_attn_tmp;
-
-                    float dk_add = q_val * d_attn_tmp;
-
-                    __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
-                    s_f32_st_g(dk_addr, dk_add + s_f32_ld_g(dk_addr));
+                        // calculate d_query = key * d_att
+                        // calculate d_key = query * d_att
+                        int5 da_coords = {ni, i, h, b, 0};
+                        __global__ float* da_addr = (__global__ float*)gen_addr(da_coords, d_attn);
+                        d_attn_tmp = s_f32_ld_g(da_addr);
+                        k_coords = {c, nbi, h, b, 0};
+                        if (ki==0) {
+                            __global__ float* k_addr = (__global__ float*)gen_addr(k_coords, key);
+                            dq_update += s_f32_ld_g(k_addr) * d_attn_tmp;
+                        }
+         
+                        if (nbi == ki) {
+                            float dk_add = q_val * d_attn_tmp;
+                            dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
+                            s_f32_st_g(dk_addr, dk_add + s_f32_ld_g(dk_addr));
+                        }
+                    }
+                    __global__ float* dq_addr = (__global__ float*)gen_addr(q_coords, d_query);
+                    if (ki==0) s_f32_st_g(dq_addr, dq_update);
                 }
-                __global__ float* dq_addr = (__global__ float*)gen_addr(q_coords, d_query);
-                s_f32_st_g(dq_addr, dq_update);
             }
         }
     }

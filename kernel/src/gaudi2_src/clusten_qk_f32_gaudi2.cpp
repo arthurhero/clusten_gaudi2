@@ -122,10 +122,10 @@ tpc_lib_api::GlueCodeReturn CLUSTENQKF32Gaudi2::GetGcDefinitions(
     *    Stage II -  Define index space geometry. In this example the index space matches
     *    the dimensions of the output tensor, up to dim 0.
     **************************************************************************************/
-    out_defs->indexSpaceRank = 3;
 
     if(m_mode == fwd)
     {
+        out_defs->indexSpaceRank = 3;
         uint64_t* querySizes = in_defs->inputTensors[0].geometry.maxSizes;
         uint64_t* nbhdIndexSizes = in_defs->inputTensors[2].geometry.maxSizes;
         out_defs->indexSpaceGeometry[0] = nbhdIndexSizes[0]; // nbhd
@@ -134,10 +134,13 @@ tpc_lib_api::GlueCodeReturn CLUSTENQKF32Gaudi2::GetGcDefinitions(
     }
     else
     {
+        out_defs->indexSpaceRank = 4;
         uint64_t* querySizes = in_defs->inputTensors[1].geometry.maxSizes;
+        uint64_t* keySizes = in_defs->inputTensors[2].geometry.maxSizes;
         out_defs->indexSpaceGeometry[0] = querySizes[0]; // channel 
         out_defs->indexSpaceGeometry[1] = querySizes[1]; // seq
         out_defs->indexSpaceGeometry[2] = querySizes[2] * querySizes[3]; // batch * head
+        out_defs->indexSpaceGeometry[3] = keySizes[1]; // length_key
     }
 
     /*************************************************************************************
