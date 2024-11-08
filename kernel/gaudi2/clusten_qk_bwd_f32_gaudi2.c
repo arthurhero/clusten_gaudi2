@@ -27,7 +27,7 @@ void main(
     const int heads = get_dim_size(query, 2);
     //const int batch_size = get_dim_size(query, 3);
     const int nbhd_size = get_dim_size(nbhd_idx, 0);
-    const int length_key = get_dim_size(key, 1);
+    //const int length_key = get_dim_size(key, 1);
 
     const int channel = 0;
     const int seq = 1;
