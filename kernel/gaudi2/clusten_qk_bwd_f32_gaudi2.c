@@ -68,7 +68,7 @@ void main(
             for (int ki = key_length_start; ki < key_length_end; ki += key_length_step)
             {
                 int5 k_coords = {c, ki, h, b, 0};
-                dk_update = 0.0;
+                float dk_update = 0.0;
 
                 #pragma loop_taken
                 for (int i = seq_start; i < seq_end; i += seq_step)
