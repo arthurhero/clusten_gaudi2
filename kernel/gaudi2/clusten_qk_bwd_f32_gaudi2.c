@@ -27,6 +27,7 @@ void main(
     const int heads = get_dim_size(query, 2);
     //const int batch_size = get_dim_size(query, 3);
     const int nbhd_size = get_dim_size(nbhd_idx, 0);
+    const int length_key = get_dim_size(key, 1);
 
     const int channel = 0;
     const int seq = 1;
@@ -50,15 +51,24 @@ void main(
     #pragma loop_taken
     for (int z = batch_head_start; z < batch_head_end; z += batch_head_step)
     {
+        const int b = z / heads;
+        const int h = z - b * heads;
+
         #pragma loop_taken
         for (int c = channel_start; c < channel_end; c += channel_step)
         {
+            // initialize d_key to 0
+            if (seq_start==0) && (c==0) && (z==0) {
+                #pragma unroll
+                for (int i = 0; i < length_key; i++) {
+                    int5 k_coords_ = {c, i, h, b, 0};
+                    __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords_, d_key);
+                    s_f32_st_g(dk_addr, 0.0);
+                }
+
             #pragma loop_taken
             for (int i = seq_start; i < seq_end; i += seq_step)
             {
-                const int b = z / heads;
-                const int h = z - b * heads;
-
                 float dq_update = 0.0;
                 float d_attn_tmp;
 
@@ -83,9 +93,9 @@ void main(
 
                     //float dk_add = q_val * d_attn_tmp;
 
-                    __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
+                    //__global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
                     //s_f32_st_g(dk_addr, dk_add + s_f32_ld_g(dk_addr));
-                    s_f32_st_g(dk_addr, 0.0);
+                    //s_f32_st_g(dk_addr, 0.0);
                 }
                 __global__ float* dq_addr = (__global__ float*)gen_addr(q_coords, d_query);
                 s_f32_st_g(dq_addr, dq_update);
