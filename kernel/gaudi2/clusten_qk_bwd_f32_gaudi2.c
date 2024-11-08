@@ -62,12 +62,9 @@ void main(
         #pragma loop_taken
         for (int c = channel_start; c < channel_end; c += channel_step)
         {
-            __global__ float* dk_addr;
-
             #pragma loop_taken
             for (int ki = key_length_start; ki < key_length_end; ki += key_length_step)
             {
-                int5 k_coords = {c, ki, h, b, 0};
                 float dk_update = 0.0;
 
                 #pragma loop_taken
@@ -91,8 +88,8 @@ void main(
                         int5 da_coords = {ni, i, h, b, 0};
                         __global__ float* da_addr = (__global__ float*)gen_addr(da_coords, d_attn);
                         d_attn_tmp = s_f32_ld_g(da_addr);
-                        int5 k_coords = {c, nbi, h, b, 0};
                         if (ki==0) {
+                            int5 k_coords = {c, nbi, h, b, 0};
                             __global__ float* k_addr = (__global__ float*)gen_addr(k_coords, key);
                             dq_update += s_f32_ld_g(k_addr) * d_attn_tmp;
                         }
