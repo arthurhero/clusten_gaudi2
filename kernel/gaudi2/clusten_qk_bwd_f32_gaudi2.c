@@ -85,13 +85,13 @@ void main(
                     aso_wait();
                 }
             }
-            //int5 k_coords = {c, length_key-1, h, b, 0};
-            //__global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
-            //volatile float dk_last = s_f32_ld_g(dk_addr);
-            //while (dk_last != 0.0)
-            //{
-            //    dk_last = s_f32_ld_g(dk_addr);
-            //}
+            int5 k_coords = {c, length_key-1, h, b, 0};
+            __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
+            volatile int dk_last = (int)s_f32_ld_g(dk_addr);
+            while (dk_last != 0)
+            {
+                dk_last = (int)s_f32_ld_g(dk_addr);
+            }
             //printf("semaphore value 2: %d, seq_start: %d\n", get_semaphore_value(), seq_start);
 
             #pragma loop_taken
