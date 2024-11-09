@@ -73,7 +73,6 @@ void main(
         #pragma loop_taken
         for (int c = channel_start; c < channel_end; c += channel_step)
         {
-            aso_lock();
             //printf("semaphore value: %d, seq_start: %d\n", get_semaphore_value(), seq_start);
             if (seq_start == 0)
             {
@@ -88,7 +87,7 @@ void main(
             }
             int5 k_coords = {c, length_key-1, h, b, 0};
             __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
-            volatile int dk_last = s_f32_ld_g(dk_addr);
+            volatile float dk_last = s_f32_ld_g(dk_addr);
             while (dk_last != 0.0)
             {
                 dk_last = s_f32_ld_g(dk_addr);
