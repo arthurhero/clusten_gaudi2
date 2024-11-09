@@ -136,7 +136,7 @@ tpc_lib_api::GlueCodeReturn CLUSTENQKF32Gaudi2::GetGcDefinitions(
     {
         out_defs->indexSpaceRank = 3;
         uint64_t* querySizes = in_defs->inputTensors[1].geometry.maxSizes;
-        uint64_t* keySizes = in_defs->inputTensors[2].geometry.maxSizes;
+        //uint64_t* keySizes = in_defs->inputTensors[2].geometry.maxSizes;
         out_defs->indexSpaceGeometry[0] = querySizes[0]; // channel 
         out_defs->indexSpaceGeometry[1] = querySizes[1]; // seq
         out_defs->indexSpaceGeometry[2] = querySizes[2] * querySizes[3]; // batch * head
