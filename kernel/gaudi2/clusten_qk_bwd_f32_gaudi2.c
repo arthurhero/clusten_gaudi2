@@ -62,7 +62,7 @@ void main(
     const int batch_head_start = index_space_start[batch_head] * batch_head_step;
     const int batch_head_end   = index_space_end[batch_head] * batch_head_step;
 
-    aso_init();
+    //aso_init();
 
     #pragma loop_taken
     for (int z = batch_head_start; z < batch_head_end; z += batch_head_step)
