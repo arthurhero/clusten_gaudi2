@@ -14,8 +14,6 @@ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY TH
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ********************************************************************/
 
-__global__ int lock1 = 1;
-
 #define aso_init()                                                                  \
     int count = 0;                                                                  \
     set_semaphore_value(0);
@@ -84,22 +82,16 @@ void main(
                     int5 k_coords = {c, ki, h, b, 0};
                     __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
                     s_f32_st_g(dk_addr, 0.0);
-                    aso_wait();
+                    //aso_wait();
                 }
-                lock1 = 0;
             }
-            volatile int lock = lock1;
-            while (lock == 1)
+            int5 k_coords = {c, length_key-1, h, b, 0};
+            __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
+            volatile int dk_last = (int)s_f32_ld_g(dk_addr);
+            while (dk_last != 0)
             {
-                lock = lock1;
+                dk_last = (int)s_f32_ld_g(dk_addr);
             }
-            // int5 k_coords = {c, length_key-1, h, b, 0};
-            // __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
-            // volatile int dk_last = (int)s_f32_ld_g(dk_addr);
-            // while (dk_last != 0)
-            // {
-            //     dk_last = (int)s_f32_ld_g(dk_addr);
-            // }
             //printf("semaphore value 2: %d, seq_start: %d\n", get_semaphore_value(), seq_start);
 
             #pragma loop_taken
