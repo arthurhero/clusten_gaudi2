@@ -14,6 +14,22 @@ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY TH
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ********************************************************************/
 
+#define aso_init()                                                                  \
+    set_semaphore_value(0);
+
+#define aso_wait()                                                                  \
+    volatile int a = get_semaphore_value();                                         \
+    while (a == 1)                                                              \
+    {                                                                               \
+        a = get_semaphore_value();                                                  \
+    }                                                                               
+
+#define aso_lock()                                                                  \
+    set_semaphore_value(1);
+
+#define aso_unlock()                                                                \
+    set_semaphore_value(0);
+
 void main(
     const tensor d_attn,         // b x h x n x m
     const tensor query,          // b x h x n x c
@@ -48,6 +64,8 @@ void main(
     const int batch_head_start = index_space_start[batch_head] * batch_head_step;
     const int batch_head_end   = index_space_end[batch_head] * batch_head_step;
 
+    aso_init();
+
     #pragma loop_taken
     for (int z = batch_head_start; z < batch_head_end; z += batch_head_step)
     {
@@ -57,13 +75,19 @@ void main(
         #pragma loop_taken
         for (int c = channel_start; c < channel_end; c += channel_step)
         {
-            #pragma loop_taken
-            for (int ki = 0; ki < length_key; ki++)
+            aso_lock();
+            if (seq_start == 0)
             {
-                int5 k_coords = {c, ki, h, b, 0};
-                __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
-                s_f32_st_g(dk_addr, 0.0);
+                #pragma unroll 
+                for (int ki = 0; ki < length_key; ki++)
+                {
+                    int5 k_coords = {c, ki, h, b, 0};
+                    __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
+                    s_f32_st_g(dk_addr, 0.0);
+                }
+                aso_unlock();
             }
+            aso_wait();
 
             #pragma loop_taken
             for (int i = seq_start; i < seq_end; i += seq_step)
