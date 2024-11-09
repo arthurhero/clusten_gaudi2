@@ -32,7 +32,6 @@ void main(
     const int channel = 0;
     const int seq = 1;
     const int batch_head = 2;
-    const int key_length = 3;
 
     const int5 index_space_start = get_index_space_offset();
     const int5 index_space_end   = get_index_space_size() + index_space_start;
