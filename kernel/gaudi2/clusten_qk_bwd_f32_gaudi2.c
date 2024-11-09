@@ -14,7 +14,7 @@ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY TH
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ********************************************************************/
 
-int lock = 0;
+int lock1 = 1;
 
 #define aso_init()                                                                  \
     int count = 0;                                                                  \
@@ -86,8 +86,13 @@ void main(
                     s_f32_st_g(dk_addr, 0.0);
                     aso_wait();
                 }
+                lock1 = 0;
             }
-            lock += 1;
+            volatile int lock = lock1;
+            while (lock == 1)
+            {
+                lock = lock1;
+            }
             // int5 k_coords = {c, length_key-1, h, b, 0};
             // __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
             // volatile int dk_last = (int)s_f32_ld_g(dk_addr);
