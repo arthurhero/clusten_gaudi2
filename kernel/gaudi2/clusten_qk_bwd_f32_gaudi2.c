@@ -87,8 +87,8 @@ void main(
                     __global__ float* dk_addr = (__global__ float*)gen_addr(k_coords, d_key);
                     s_f32_st_g(dk_addr, 0.0);
                 }
-                aso_unlock();
             }
+            aso_unlock();
             aso_wait();
             //printf("semaphore value 2: %d, seq_start: %d\n", get_semaphore_value(), seq_start);
 
