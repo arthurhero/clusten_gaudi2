@@ -14,21 +14,25 @@ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY TH
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ********************************************************************/
 
-#define aso_init()                                                                  \
-    set_semaphore_value(0);
+__global__ int lock=1;
+
+#define set_lock_value(val) lock = val
+#define get_lock_value() lock
+
 
 #define aso_wait()                                                                  \
-    volatile int a = get_semaphore_value();                                         \
+    volatile int a = get_lock_value();                                         \
     while (a == 1)                                                              \
     {                                                                               \
-        a = get_semaphore_value();                                                  \
+        a = get_lock_value();                                                  \
     }                                                                               
 
 #define aso_lock()                                                                  \
-    set_semaphore_value(1);
+    set_lock_value(1);
 
 #define aso_unlock()                                                                \
-    set_semaphore_value(0);
+    set_lock_value(0);
+
 
 void main(
     const tensor d_attn,         // b x h x n x m
@@ -64,8 +68,6 @@ void main(
     const int batch_head_start = index_space_start[batch_head] * batch_head_step;
     const int batch_head_end   = index_space_end[batch_head] * batch_head_step;
 
-    aso_init();
-
     #pragma loop_taken
     for (int z = batch_head_start; z < batch_head_end; z += batch_head_step)
     {
@@ -75,8 +77,7 @@ void main(
         #pragma loop_taken
         for (int c = channel_start; c < channel_end; c += channel_step)
         {
-            aso_lock();
-            printf("semaphore value: %d, seq_start: %d\n", get_semaphore_value(), seq_start);
+            //printf("semaphore value: %d, seq_start: %d\n", get_semaphore_value(), seq_start);
             if (seq_start == 0)
             {
                 #pragma unroll 
@@ -88,7 +89,8 @@ void main(
                 }
                 aso_unlock();
             }
-            printf("semaphore value 2: %d, seq_start: %d\n", get_semaphore_value(), seq_start);
+            aso_wait();
+            //printf("semaphore value 2: %d, seq_start: %d\n", get_semaphore_value(), seq_start);
 
             #pragma loop_taken
             for (int i = seq_start; i < seq_end; i += seq_step)
@@ -123,7 +125,7 @@ void main(
                 __global__ float* dq_addr = (__global__ float*)gen_addr(q_coords, d_query);
                 s_f32_st_g(dq_addr, dq_update);
             }
-            printf("semaphore value 3: %d, seq_start: %d\n", get_semaphore_value(), seq_start);
+            //printf("semaphore value 3: %d, seq_start: %d\n", get_semaphore_value(), seq_start);
         }
     }
 }
