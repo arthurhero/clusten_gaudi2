@@ -76,6 +76,7 @@ void main(
         for (int c = channel_start; c < channel_end; c += channel_step)
         {
             aso_lock();
+            std::cout << "semaphore value: " << get_semaphore_value() << "seq_start: " << seq_start << std::endl;
             if (seq_start == 0)
             {
                 #pragma unroll 
@@ -87,7 +88,7 @@ void main(
                 }
                 aso_unlock();
             }
-            aso_wait();
+            std::cout << "semaphore value again: " << get_semaphore_value() << "seq_start: " << seq_start << std::endl;
 
             #pragma loop_taken
             for (int i = seq_start; i < seq_end; i += seq_step)
@@ -122,6 +123,7 @@ void main(
                 __global__ float* dq_addr = (__global__ float*)gen_addr(q_coords, d_query);
                 s_f32_st_g(dq_addr, dq_update);
             }
+            std::cout << "semaphore value 3: " << get_semaphore_value() << "seq_start: " << seq_start << std::endl;
         }
     }
 }
